@@ -11,14 +11,12 @@
   <div id="app">
     <h1>할 일</h1>
     <ul>
-      <li v-for="(todo, index) in todoMap"  >
-        <input type="checkbox" v-model="checked[index]" />
+      <li v-for="(todo, key) in todoMap" v-bind:key="key" v-on:click="remove" >
         {{ todo }}
       </li>
     </ul>
     <input type="text" v-model.trim="todo" />
     <button type="button" v-on:click="save"  v-bind:disabled="!todo" >추가</button>
-    <button type="button" v-on:click="remove" v-show="checkedCount > 0" > 삭제</button>
   </div>
 
   <script type="text/javascript">
@@ -28,7 +26,6 @@
         todoMap: {},
         todo: {},
         checked: [],
-        showDialog: false,
         selectedKey: null
 
       },computed: {
@@ -44,22 +41,16 @@
           axios.get('https://skhu-jhj.firebaseio.com/todo1.json')
                .then(response => this.todoMap = response.data);
         },save: function() {
+          
           axios.post('https://skhu-jhj.firebaseio.com/todo1.json', this.todo)
                  .then(response => this.reload());
-          this.showDialog = false;
           this.todo = {};
           
-        },remove: function() {
-          if (confirm("삭제하시겠습니까?") == false) return;
-          axios.delete('https://skhu-jhj.firebaseio.com/todo1/' + this.todo + '.json')
-                 .then(response => this.reload());
-          this.showDialog = false;
-          
-        },
-        edit: function(key) {
-          this.showDialog = "수정";
-          this.todo = Object.assign({}, this.todoMap[key]);
+        },remove: function(key) {
           this.selectedKey = key;
+          if (confirm("삭제하시겠습니까?") == false) return;
+          axios.delete('https://skhu-jhj.firebaseio.com/todo1/' + this.selectedKey + '.json')
+                 .then(response => this.reload());
         }
       }
     })
